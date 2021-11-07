@@ -14,6 +14,14 @@ for i in range(len(all)):
 # feature selection
 featureSelection = SelectKBest(f_classif)
 featureSelection.fit(X, Y)
-ranks = featureSelection.get_support(True)
-for i in ranks:
-    print("Feature no.", i + 1, "Value ", featureSelection.scores_[i])
+print(featureSelection.scores_)
+toSort = np.zeros(
+    (len(featureSelection.scores_)), dtype=([("key", "<i4"), ("val", "<f8")])
+)
+for i in range(len(featureSelection.scores_)):
+    toSort[i]["key"] = i + 1
+    toSort[i]["val"] = featureSelection.scores_[i]
+toSort = np.sort(toSort, order="val")[::-1]
+print(toSort)
+# for i in ranks:
+#   print("Feature no.", i + 1, "Value ", featureSelection.scores_[i])

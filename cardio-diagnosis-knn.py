@@ -18,7 +18,7 @@ features_quantity = len(X[0] - 1)
 featureSelection = SelectKBest(f_classif)
 featureSelection.fit(X, y)
 
-# sorting feature scores
+# sorting by relevance
 toSort = np.zeros(
     (len(featureSelection.scores_)), dtype=([("key", "<i4"), ("val", "<f8")])
 )
@@ -32,7 +32,7 @@ for i in range(features_quantity):
     print("%d. Feature no. %d, Score: %f" % (i + 1, toSort[i][0], toSort[i][1]))
     feature_order.append(toSort[i][0])
 
-# sorting dataset features by relevance
+
 def complement(arr):
     new_arr = []
     for x in range(len(arr)):
@@ -47,25 +47,23 @@ idx[permutation] = np.arange(len(permutation))
 X = X[:, idx]
 print(X)
 
-# splitting dataset for train, test and cv subsets
-
 from sklearn.model_selection import RepeatedKFold
 
 rkf = RepeatedKFold(n_splits=2, n_repeats=5, random_state=10)
 
-# Experiment loop
-
 from numpy import mean, std
+from sklearn import metrics
 from sklearn.model_selection import cross_val_score
 from sklearn.neighbors import KNeighborsClassifier
 
 metric_list = ["manhattan", "euclidean"]
+max_features = 6
 
 highest_acc = 0
 lowest_acc = 1
 
 # print(X_train[:,:2])
-for top in range(features_quantity):
+for top in range(max_features):
     print("\n")
     features_train = X[:, : (top + 1)]
     acc_list = []

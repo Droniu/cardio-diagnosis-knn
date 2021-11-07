@@ -86,5 +86,5 @@ for top in range(max_features):
                 lowest_acc = result
     print("Mean accuracy for top %d features: %f" % (top + 1, mean(acc_list)))
 
-print("\nMaximum accuracy:", highest_acc)
-print("Minimum accuracy:", lowest_acc)
+print("\nMaximum accuracy: %.1f %%" % (highest_acc * 100))
+print("Minimum accuracy: %.1f %%" % (lowest_acc * 100))

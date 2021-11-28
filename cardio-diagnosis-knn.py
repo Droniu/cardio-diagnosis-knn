@@ -9,13 +9,8 @@ from sklearn.feature_selection import SelectKBest, f_classif
 # loading data to tables
 file = open("heart.dat")
 all = np.loadtxt(file, delimiter=" ")
-X = np.zeros((len(all), len(all[0]) - 1), dtype=np.uint8)
-y = np.zeros((len(all)), dtype=np.uint8)
-for i in range(len(all)):
-    for j in range(len(all[0]) - 1):
-        X[i][j] = all[i][j]
-    y[i] = all[i][len(all[0]) - 1]
-
+X = all[:, :-1]
+y = all[:, -1].astype(int)
 features_quantity = len(X[0] - 1)
 
 # feature selection
@@ -51,44 +46,47 @@ idx[permutation] = np.arange(len(permutation))
 X = X[:, idx]
 print(X)
 
-from sklearn.model_selection import RepeatedKFold
+from sklearn.model_selection import RepeatedStratifiedKFold
 
-rkf = RepeatedKFold(n_splits=2, n_repeats=5, random_state=10)
+rskf = RepeatedStratifiedKFold(n_splits=2, n_repeats=5, random_state=10)
+
 
 from numpy import mean, std
-from sklearn import metrics
-from sklearn.model_selection import cross_val_score
+from sklearn.metrics import accuracy_score
 from sklearn.neighbors import KNeighborsClassifier
 
 metric_list = ["manhattan", "euclidean"]
 max_features = 6
 
-highest_acc = 0
-lowest_acc = 1
-
-# print(X_train[:,:2])
 for top in range(max_features):
     print("\n")
-    features_train = X[:, : (top + 1)]
-    acc_list = []
+    # select only top features
+    X = X[:, : (top + 1)]
+
     for p in metric_list:
         for k in range(5, 10, 2):
             model = KNeighborsClassifier(n_neighbors=k, metric=p)
-            scores = cross_val_score(
-                model, features_train, y, scoring="accuracy", cv=rkf, n_jobs=-1
-            )
-            result = mean(scores)
+            scores = []
+            for train_index, test_index in rskf.split(X, y):
+                X_train, X_test = X[train_index], X[test_index]
+                y_train, y_test = y[train_index], y[test_index]
+                model.fit(X_train, y_train)
+                predict = model.predict(X_test)
+                scores.append(accuracy_score(y_test, predict))
+
+            mean_score = mean(scores)
+            std_score = std(scores)
             print(
                 "Accuracy(k=%d, %s metric, top %d features): %.3f (%.3f)"
-                % (k, p, top + 1, result, std(scores))
+                % (k, p, top + 1, mean_score, std_score)
             )
-            acc_list.append(result)
 
-            if result > highest_acc:
-                highest_acc = result
-            if result < lowest_acc:
-                lowest_acc = result
-    print("Mean accuracy for top %d features: %f" % (top + 1, mean(acc_list)))
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
 
-print("\nMaximum accuracy: %.1f %%" % (highest_acc * 100))
-print("Minimum accuracy: %.1f %%" % (lowest_acc * 100))
+clfs = {
+    "GNB": GaussianNB(),
+    "kNN": KNeighborsClassifier(),
+    "CART": DecisionTreeClassifier(random_state=42),
+}

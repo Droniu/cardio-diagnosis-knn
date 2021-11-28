@@ -83,7 +83,6 @@ for top in range(max_features):
             mean = np.mean(scores, axis=1)
             std = np.std(scores, axis=1)
 
- 
     alfa = 0.05
     t_statistic = np.zeros((len(classifiers), len(classifiers)))
     p_value = np.zeros((len(classifiers), len(classifiers)))

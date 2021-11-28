@@ -1,3 +1,7 @@
+# Jakub Dudek
+# Michał Droń
+# knn - dataset statlog heart
+
 #%%writefile "select-filter.py"
 import numpy as np
 from sklearn.feature_selection import SelectKBest, f_classif
